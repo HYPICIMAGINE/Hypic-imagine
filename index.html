@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Hypic Imagine®</title>
+  <script src="https://cdn.emailjs.com/dist/email.min.js"></script>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(to bottom right, #ff1493, #1e1e60);
+      color: white;
+      text-align: center;
+    }
+
+    .splash {
+      padding: 60px 20px;
+    }
+
+    #login-page, #main-ui {
+      display: none;
+      padding: 20px;
+    }
+
+    button {
+      background: linear-gradient(to right, #00b4db, #0083b0);
+      color: white;
+      padding: 12px 24px;
+      margin: 10px;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+
+    form {
+      background-color: rgba(255,255,255,0.1);
+      padding: 20px;
+      margin: auto;
+      border-radius: 15px;
+      max-width: 400px;
+    }
+
+    input, textarea {
+      width: 100%;
+      padding: 10px;
+      margin-top: 10px;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+    }
+
+    #footer {
+      margin-top: 40px;
+      font-size: 14px;
+      color: #ccc;
+    }
+
+    .logo {
+      width: 80px;
+      margin-bottom: 10px;
+    }
+
+    .gmail-id {
+      font-size: 14px;
+      color: #ddd;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="splash">
+    <img src="logo.png" alt="Hypic Imagine Logo" class="logo" />
+    <h1>Welcome to Hypic Imagine®</h1>
+    <p>Powered by Hypic®</p>
+  </div>
+
+  <div id="login-page">
+    <h2>Login to Continue</h2>
+    <button id="google-login">Login with Google</button>
+  </div>
+
+  <div id="main-ui">
+    <h2>Contact Us</h2>
+    <p class="gmail-id" id="gmail-display"></p>
+
+    <form id="contact-form">
+      <input type="text" name="user_name" placeholder="Your Name" required>
+      <input type="email" name="user_email" id="user-email" readonly>
+      <textarea name="message" rows="4" placeholder="Your Message" required></textarea>
+      <button type="submit">Send Message</button>
+    </form>
+
+    <button onclick="logout()">Logout</button>
+    <div id="footer">© Hypic Imagine® | Powered by Hypic® | www.hypicimagine.com</div>
+  </div>
+
+  <!-- Firebase Google Auth Script -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
+    import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyACduQOk9ea5oPZkQlrSwk4E-x5hGE5iAw",
+      authDomain: "hypicimagine-79228.firebaseapp.com",
+      projectId: "hypicimagine-79228",
+      storageBucket: "hypicimagine-79228.appspot.com",
+      messagingSenderId: "160722801005",
+      appId: "1:160722801005:web:d4f6813d6e36759cb70a64",
+      measurementId: "G-9Z1VK71W5Z"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const provider = new GoogleAuthProvider();
+
+    document.getElementById("google-login").addEventListener("click", () => {
+      signInWithPopup(auth, provider)
+        .then((result) => {
+          const user = result.user;
+          document.getElementById("user-email").value = user.email;
+          document.getElementById("gmail-display").textContent = "Logged in as: " + user.email;
+          document.getElementById("main-ui").style.display = "block";
+          document.getElementById("login-page").style.display = "none";
+        })
+        .catch((error) => {
+          alert("Login failed: " + error.message);
+        });
+    });
+
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        document.getElementById("user-email").value = user.email;
+        document.getElementById("gmail-display").textContent = "Logged in as: " + user.email;
+        document.getElementById("main-ui").style.display = "block";
+        document.getElementById("login-page").style.display = "none";
+      } else {
+        document.getElementById("login-page").style.display = "block";
+        document.getElementById("main-ui").style.display = "none";
+      }
+    });
+
+    window.logout = () => {
+      signOut(auth).then(() => location.reload());
+    };
+  </script>
+
+  <!-- EmailJS Submit Script -->
+  <script>
+    emailjs.init("P-9UG1p6llqTbVj6q"); // 🔁 Replace with your EmailJS public key
+
+    document.getElementById("contact-form").addEventListener("submit", function(e) {
+      e.preventDefault();
+      emailjs.sendForm("service_y62b35k", "template_ilivsei", this)
+        .then(() => {
+          alert("✅ Message sent!");
+          this.reset();
+          document.getElementById("user-email").value = firebase.auth().currentUser.email;
+        }, (error) => {
+          alert("❌ Error: " + error.text);
+        });
+    });
+  </script>
+
+</body>
+</html>
